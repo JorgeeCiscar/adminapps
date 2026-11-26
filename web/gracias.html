@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gracias</title>
+  <link rel="stylesheet" href="estilo.css">
+  <script src="config.js"></script>
+</head>
+<body>
+<main>
+  <h1>¡Gracias por suscribirte!</h1>
+  <p id="texto">Ya puedes volver a la aplicación. En unos segundos se activará tu suscripción; si no, ve a Ajustes y pulsa «Comprobar de nuevo».</p>
+  <p class="muted">Recibirás la factura por email. Puedes gestionar o cancelar la suscripción desde Ajustes → «Gestionar suscripción».</p>
+</main>
+<script>
+  const app = window.PAGO.apps[new URLSearchParams(location.search).get('app')]
+  if (app) document.getElementById('texto').textContent = `Ya puedes volver a ${app.nombre}. En unos segundos se activará tu suscripción; si no, ve a Ajustes y pulsa «Comprobar de nuevo».`
+</script>
+</body>
+</html>

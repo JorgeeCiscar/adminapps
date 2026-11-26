@@ -1,0 +1,14 @@
+{
+  "name": "adminapps",
+  "private": true,
+  "description": "Servidor de licencias y panel de control de FotoGestor y AppClase",
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "postgres": "3.4.5"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,17 @@
+:root { --bg: #f6f6f4; --panel: #fff; --text: #1d1d1d; --muted: #6b6b6b; --line: #e2e2de; --accent: #2680eb; --accent-text: #fff; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) { :root { --bg: #1d1d1d; --panel: #262626; --text: #e4e4e4; --muted: #9a9a9a; --line: #3a3a3a; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 'Segoe UI', Inter, system-ui, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
+h1 { font-size: 28px; font-weight: 600; margin: 0 0 8px; }
+.muted { color: var(--muted); }
+.planes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 32px 0; }
+.plan { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
+.plan h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.precio { font-size: 32px; font-weight: 600; }
+.precio small { font-size: 15px; font-weight: 400; color: var(--muted); }
+.nota { color: #2e8b57; font-size: 14px; font-weight: 600; min-height: 1.5em; }
+button { margin-top: 8px; font: inherit; font-weight: 600; padding: 12px; border-radius: 8px; border: 0; background: var(--accent); color: var(--accent-text); cursor: pointer; }
+button:hover { filter: brightness(1.08); }
+.aviso { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+footer { margin-top: 40px; font-size: 13px; }

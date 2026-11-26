@@ -1,0 +1,16 @@
+# Proyecto de Supabase del servidor de licencias.
+project_id = "adminapps"
+
+# Las claves nuevas de Supabase (sb_publishable_…) no son JWT, así que la pasarela no comprueba el
+# token: cada función valida al usuario por su cuenta (y paddle-webhook, la firma de Paddle).
+[functions.license-check]
+verify_jwt = false
+
+[functions.device-deactivate]
+verify_jwt = false
+
+[functions.portal-session]
+verify_jwt = false
+
+[functions.paddle-webhook]
+verify_jwt = false

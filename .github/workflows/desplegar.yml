@@ -1,0 +1,75 @@
+# Prueba y despliega el servidor de licencias en Supabase: tablas (migraciones), secretos de las
+# funciones y funciones. Se ejecuta al subir cambios de supabase/ a main, o a mano desde Actions.
+name: Desplegar servidor
+
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/**', 'tests/**', '.github/workflows/desplegar.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: desplegar
+  cancel-in-progress: false
+
+env:
+  PROJECT_REF: dvqgknryosgdmriplmim
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pruebas
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  desplegar:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar que están los secretos
+        run: |
+          falta=0
+          for k in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD; do
+            if [ -z "${!k}" ]; then echo "::error::Falta el secreto $k (Settings → Secrets and variables → Actions)"; falta=1; fi
+          done
+          exit $falta
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase link --project-ref "$PROJECT_REF"
+      - name: Tablas (migraciones)
+        run: supabase db push
+      - name: Secretos de las funciones
+        env:
+          PADDLE_API_KEY: ${{ secrets.PADDLE_API_KEY }}
+          PADDLE_WEBHOOK_SECRET: ${{ secrets.PADDLE_WEBHOOK_SECRET }}
+          PADDLE_ENV: ${{ vars.PADDLE_ENV || 'sandbox' }}
+          CHECKOUT_URL: ${{ vars.CHECKOUT_URL || 'https://jorgeeciscar.github.io/adminapps/pagar.html' }}
+          APP_PUBLISHABLE_KEY: sb_publishable_ZxnQ14Aw9C8jksNSXJ55hA_cIgjywLJ
+        run: |
+          umask 077
+          : > secretos.env
+          for k in PADDLE_API_KEY PADDLE_WEBHOOK_SECRET PADDLE_ENV CHECKOUT_URL APP_PUBLISHABLE_KEY; do
+            if [ -n "${!k}" ]; then printf '%s=%s\n' "$k" "${!k}" >> secretos.env; else echo "::warning::Falta $k"; fi
+          done
+          supabase secrets set --env-file secretos.env --project-ref "$PROJECT_REF"
+          rm -f secretos.env
+      - name: Funciones
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api

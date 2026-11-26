@@ -1,0 +1,50 @@
+# Genera el par de claves Ed25519 de las licencias. La privada se guarda directamente como secreto
+# de Supabase (nadie la ve) y la pública se muestra en el resumen de la ejecución, para compilar
+# las apps con ella. Solo se ejecuta a mano y se niega si ya hay una clave (cambiarla dejaría
+# sin servicio a todas las apps instaladas).
+name: Generar claves de licencia
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT_REF: dvqgknryosgdmriplmim
+
+jobs:
+  claves:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: ¿Ya existe una clave?
+        run: |
+          if supabase secrets list --project-ref "$PROJECT_REF" | grep -q LICENSE_PRIVATE_KEY; then
+            echo "::error::Ya existe LICENSE_PRIVATE_KEY. No se genera otra para no invalidar las apps instaladas."
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generar y guardar
+        run: |
+          umask 077
+          node -e '
+            const { generateKeyPairSync } = require("node:crypto")
+            const fs = require("node:fs")
+            const { publicKey, privateKey } = generateKeyPairSync("ed25519")
+            fs.writeFileSync("claves.env", "LICENSE_PRIVATE_KEY=" + privateKey.export({ format: "der", type: "pkcs8" }).toString("base64") + "\n")
+            fs.writeFileSync("publica.txt", publicKey.export({ format: "der", type: "spki" }).toString("base64"))
+          '
+          supabase secrets set --env-file claves.env --project-ref "$PROJECT_REF"
+          rm -f claves.env
+          {
+            echo "### Clave pública de las licencias"
+            echo "Cópiala en la variable \`LICENSE_PUBLIC_KEY\` del repositorio de cada app."
+            echo '```'
+            cat publica.txt
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

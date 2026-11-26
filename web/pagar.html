@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suscripción</title>
+  <link rel="stylesheet" href="estilo.css">
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+<main>
+  <h1 id="titulo">Suscripción</h1>
+  <p class="muted" id="sub">Elige cómo quieres pagar. Puedes cancelar cuando quieras.</p>
+  <div class="planes" id="planes"></div>
+  <div class="aviso" id="aviso" hidden></div>
+  <footer class="muted">El pago lo gestiona Paddle.com, que actúa como vendedor e incluye los impuestos de tu país.</footer>
+</main>
+<script>
+  const p = new URLSearchParams(location.search)
+  const cfg = window.PAGO
+  const app = cfg.apps[p.get('app')]
+  const uid = p.get('uid')
+  const email = p.get('email') || undefined
+  const aviso = (texto) => { const a = document.getElementById('aviso'); a.textContent = texto; a.hidden = false }
+
+  if (!app || !uid) {
+    aviso('Abre esta página desde la aplicación: en la barra lateral o en Ajustes, pulsa «Suscribirse».')
+  } else if (!cfg.tokenCliente || app.planes.some((pl) => !pl.id)) {
+    aviso('Los pagos todavía no están disponibles. Vuelve a intentarlo más adelante.')
+  } else {
+    document.getElementById('titulo').textContent = `Suscripción a ${app.nombre}`
+    document.title = `Suscripción a ${app.nombre}`
+    if (cfg.entorno !== 'production') Paddle.Environment.set('sandbox')
+    Paddle.Initialize({ token: cfg.tokenCliente })
+    const cont = document.getElementById('planes')
+    for (const plan of app.planes) {
+      const el = document.createElement('div')
+      el.className = 'plan'
+      el.innerHTML = `<h2></h2><div class="precio"></div><div class="nota"></div><button type="button">Suscribirme</button>`
+      el.querySelector('h2').textContent = plan.nombre
+      el.querySelector('.precio').innerHTML = `${plan.precio} <small></small>`
+      el.querySelector('small').textContent = plan.periodo
+      el.querySelector('.nota').textContent = plan.nota || ''
+      el.querySelector('button').onclick = () => Paddle.Checkout.open({
+        items: [{ priceId: plan.id, quantity: 1 }],
+        customer: email ? { email } : undefined,
+        customData: { user_id: uid, app: p.get('app') },
+        settings: { displayMode: 'overlay', locale: 'es', successUrl: new URL(`gracias.html?app=${encodeURIComponent(p.get('app'))}`, location.href).href }
+      })
+      cont.append(el)
+    }
+  }
+</script>
+</body>
+</html>
