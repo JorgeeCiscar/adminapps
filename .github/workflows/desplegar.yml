@@ -55,7 +55,7 @@ jobs:
           version: latest
       - run: supabase link --project-ref "$PROJECT_REF" --yes
       - name: Tablas (migraciones)
-        run: supabase db push --yes
+        run: supabase db push --remote --yes
       - name: Secretos de las funciones
         env:
           PADDLE_API_KEY: ${{ secrets.PADDLE_API_KEY }}
