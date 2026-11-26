@@ -3,7 +3,7 @@ window.PAGO = {
   // 'sandbox' para pruebas, 'production' para cobrar de verdad.
   entorno: 'sandbox',
   // Paddle → Developer tools → Authentication → Client-side tokens (empieza por test_ o live_).
-  tokenCliente: '',
+  tokenCliente: 'test_d23e7593ffd3e881ad7df1d2323',
   apps: {
     fotogestor: {
       nombre: 'FotoGestor',
