@@ -53,9 +53,9 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - run: supabase link --project-ref "$PROJECT_REF"
+      - run: supabase link --project-ref "$PROJECT_REF" --yes
       - name: Tablas (migraciones)
-        run: supabase db push
+        run: supabase db push --yes
       - name: Secretos de las funciones
         env:
           PADDLE_API_KEY: ${{ secrets.PADDLE_API_KEY }}
@@ -69,7 +69,7 @@ jobs:
           for k in PADDLE_API_KEY PADDLE_WEBHOOK_SECRET PADDLE_ENV CHECKOUT_URL APP_PUBLISHABLE_KEY; do
             if [ -n "${!k}" ]; then printf '%s=%s\n' "$k" "${!k}" >> secretos.env; else echo "::warning::Falta $k"; fi
           done
-          supabase secrets set --env-file secretos.env --project-ref "$PROJECT_REF"
+          supabase secrets set --env-file secretos.env --project-ref "$PROJECT_REF" --yes
           rm -f secretos.env
       - name: Funciones
-        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api --yes

@@ -21,7 +21,9 @@ jobs:
           version: latest
       - name: ¿Ya existe una clave?
         run: |
-          if supabase secrets list --project-ref "$PROJECT_REF" | grep -q LICENSE_PRIVATE_KEY; then
+          set -o pipefail
+          lista=$(supabase secrets list --project-ref "$PROJECT_REF")
+          if echo "$lista" | grep -q LICENSE_PRIVATE_KEY; then
             echo "::error::Ya existe LICENSE_PRIVATE_KEY. No se genera otra para no invalidar las apps instaladas."
             exit 1
           fi
@@ -38,7 +40,7 @@ jobs:
             fs.writeFileSync("claves.env", "LICENSE_PRIVATE_KEY=" + privateKey.export({ format: "der", type: "pkcs8" }).toString("base64") + "\n")
             fs.writeFileSync("publica.txt", publicKey.export({ format: "der", type: "spki" }).toString("base64"))
           '
-          supabase secrets set --env-file claves.env --project-ref "$PROJECT_REF"
+          supabase secrets set --env-file claves.env --project-ref "$PROJECT_REF" --yes
           rm -f claves.env
           {
             echo "### Clave pública de las licencias"
