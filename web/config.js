@@ -8,8 +8,8 @@ window.PAGO = {
     fotogestor: {
       nombre: 'FotoGestor',
       planes: [
-        { id: '', nombre: 'Mensual', precio: '9,99 €', periodo: 'al mes' },
-        { id: '', nombre: 'Anual', precio: '99 €', periodo: 'al año', nota: '2 meses gratis' }
+        { id: 'pri_01m8cxbq6p64a1jv1rmmadx03t', nombre: 'Mensual', precio: '9,99 €', periodo: 'al mes' },
+        { id: 'pri_01m8cxcf1qwy1dn92vq9y1qzm5', nombre: 'Anual', precio: '99 €', periodo: 'al año', nota: '2 meses gratis' }
       ]
     },
     appclase: {
